@@ -15,6 +15,8 @@ public class Sample {
 			InputStream i = a.getInputStream();
 			OutputStream o = a.getOutputStream();
 			byte []buf =new byte[8192];
+			
+			
 			int c = 0;
 			while ( (c = i.read(buf))>0){
 				System.out.println("READ "+c);
