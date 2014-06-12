@@ -19,21 +19,23 @@
 
 package com.flazr.rtmp.proxy;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.SimpleChannelInboundHandler;
+
 import com.flazr.rtmp.RtmpEncoder;
 import com.flazr.rtmp.RtmpMessage;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipelineCoverage;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 
-public class ProxyEncoder extends SimpleChannelUpstreamHandler {
+public class ProxyEncoder extends SimpleChannelInboundHandler<RtmpMessage> {
 
     private final RtmpEncoder encoder = new RtmpEncoder();
 
-    @Override
-    public void messageReceived(final ChannelHandlerContext ctx, final MessageEvent e) throws Exception {        
-        Channels.fireMessageReceived(ctx, encoder.encode((RtmpMessage) e.getMessage()));
-    }
+    
+	@Override
+	protected void channelRead0(io.netty.channel.ChannelHandlerContext ctx,RtmpMessage msg) throws Exception {
+		// TODO Auto-generated method stub
+		ByteBuf out = ctx.alloc().buffer();
+		encoder.encode(ctx,msg,out);
+		ctx.pipeline().fireChannelRead(out);
+	}
 
 }

@@ -19,11 +19,10 @@
 
 package com.flazr.rtmp.proxy;
 
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.socket.ClientSocketChannelFactory;
+import io.netty.channel.ChannelPipeline;
 
+import java.nio.channels.Channels;
+/*
 public class ProxyPipelineFactory implements ChannelPipelineFactory {
 
     private final ClientSocketChannelFactory cf;
@@ -45,3 +44,4 @@ public class ProxyPipelineFactory implements ChannelPipelineFactory {
     }
 
 }
+*/

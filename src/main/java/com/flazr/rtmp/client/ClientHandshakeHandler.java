@@ -67,7 +67,6 @@ public class ClientHandshakeHandler extends ByteToMessageDecoder   {
 			logger.info("connected, starting handshake");                
 	        ctx.writeAndFlush(handshake.encodeClient0());
 			ctx.writeAndFlush(handshake.encodeClient1());
-	        //ctx.read();
 	}
 
 }

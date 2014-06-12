@@ -19,21 +19,22 @@
 
 package com.flazr.rtmp.proxy;
 
-import com.flazr.rtmp.RtmpConfig;
-import com.flazr.util.StopMonitor;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.bootstrap.ChannelFactory;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.ChannelGroupFuture;
+import io.netty.channel.group.DefaultChannelGroup;
+
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import org.jboss.netty.bootstrap.ServerBootstrap;
-import org.jboss.netty.channel.ChannelFactory;
-import org.jboss.netty.channel.group.ChannelGroup;
-import org.jboss.netty.channel.group.ChannelGroupFuture;
-import org.jboss.netty.channel.group.DefaultChannelGroup;
-import org.jboss.netty.channel.socket.ClientSocketChannelFactory;
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
-import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.flazr.rtmp.RtmpConfig;
+import com.flazr.util.StopMonitor;
 
 public class RtmpProxy {
 
@@ -41,19 +42,18 @@ public class RtmpProxy {
 
     static {
         RtmpConfig.configureProxy();
-        ALL_CHANNELS = new DefaultChannelGroup("rtmp-proxy");
+        ALL_CHANNELS = new DefaultChannelGroup("rtmp-proxy", null);
     }
 
     protected static final ChannelGroup ALL_CHANNELS;
 
     public static void main(String[] args) throws Exception {        
-
+/*
         Executor executor = Executors.newCachedThreadPool();
-        ChannelFactory factory = new NioServerSocketChannelFactory(executor, executor);
-        ServerBootstrap sb = new ServerBootstrap(factory);
+        Bootstrap sb = new Bootstrap();
         ClientSocketChannelFactory cf = new NioClientSocketChannelFactory(executor, executor);
-        sb.setPipelineFactory(new ProxyPipelineFactory(cf,
-                RtmpConfig.PROXY_REMOTE_HOST, RtmpConfig.PROXY_REMOTE_PORT));
+        
+        sb.setPipelineFactory(new ProxyPipelineFactory(cf, RtmpConfig.PROXY_REMOTE_HOST, RtmpConfig.PROXY_REMOTE_PORT));
         InetSocketAddress socketAddress = new InetSocketAddress(RtmpConfig.PROXY_PORT);
         sb.bind(socketAddress);
         logger.info("proxy server started, listening on {}", socketAddress);
@@ -61,14 +61,12 @@ public class RtmpProxy {
         Thread monitor = new StopMonitor(RtmpConfig.PROXY_STOP_PORT);
         monitor.start();
         monitor.join();
-
         ChannelGroupFuture future = ALL_CHANNELS.close();
         logger.info("closing channels");
         future.awaitUninterruptibly();
         logger.info("releasing resources");
-        factory.releaseExternalResources();
         logger.info("server stopped");
-
+*/
     }
 
 }

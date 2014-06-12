@@ -18,15 +18,18 @@
  */
 package com.flazr.rtmp.server;
 
-import com.flazr.rtmp.RtmpMessage;
-import com.flazr.util.Utils;
+import io.netty.channel.Channel;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.group.ChannelGroup;
-import org.jboss.netty.channel.group.DefaultChannelGroup;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.flazr.rtmp.RtmpMessage;
+import com.flazr.util.Utils;
 
 public class ServerStream {
 
@@ -58,7 +61,7 @@ public class ServerStream {
         this.name = Utils.trimSlashes(rawName).toLowerCase();
         if(typeString != null) {
             this.publishType = PublishType.parse(typeString); // TODO record, append
-            subscribers = new DefaultChannelGroup(name);
+            subscribers = new DefaultChannelGroup(name,null);
             configMessages = new ArrayList<RtmpMessage>();
         } else {
             this.publishType = null;

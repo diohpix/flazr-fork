@@ -19,55 +19,68 @@
 
 package com.flazr.rtmp.proxy;
 
+import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.nio.NioEventLoopGroup;
+
 import java.net.InetSocketAddress;
-import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelFutureListener;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipelineCoverage;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.channel.socket.ClientSocketChannelFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@ChannelPipelineCoverage("one")
-public class ProxyHandler extends SimpleChannelUpstreamHandler {
+import com.flazr.rtmp.RtmpDecoder;
+import com.flazr.rtmp.RtmpEncoder;
+import com.flazr.rtmp.client.ClientHandler;
+import com.flazr.rtmp.client.ClientHandshakeHandler;
+import com.sun.istack.internal.FinalArrayList;
 
+public class ProxyHandler extends ChannelInboundHandlerAdapter {
+
+	private static EventLoopGroup workerGroup  = new NioEventLoopGroup(2);
     private static final Logger logger = LoggerFactory.getLogger(ProxyHandler.class);
 
-    private final ClientSocketChannelFactory cf;
     private final String remoteHost;
     private final int remotePort;
 
     private volatile Channel outboundChannel;
 
-    public ProxyHandler(ClientSocketChannelFactory cf, String remoteHost, int remotePort) {
-        this.cf = cf;
+    public ProxyHandler( String remoteHost, int remotePort) {
         this.remoteHost = remoteHost;
         this.remotePort = remotePort;
     }
 
     @Override
-    public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) {        
-        final Channel inboundChannel = e.getChannel();
+    public void channelActive(final ChannelHandlerContext ctx) {        
+        final Channel inboundChannel = ctx.channel();
         RtmpProxy.ALL_CHANNELS.add(inboundChannel);
-        inboundChannel.setReadable(false);        
-        ClientBootstrap cb = new ClientBootstrap(cf);
-        cb.getPipeline().addLast("handshaker", new ProxyHandshakeHandler());
-        cb.getPipeline().addLast("handler", new OutboundHandler(e.getChannel()));
+        ctx.channel().config().setAutoRead(false);        
+        Bootstrap cb = new Bootstrap();
+        cb.group(workerGroup);
+        cb.handler(new ChannelInitializer<Channel>() {
+			@Override
+			protected void initChannel(Channel ch) throws Exception {
+				ChannelPipeline p = ch.pipeline();
+		        p.addLast("handshaker", new ProxyHandshakeHandler());
+		        p.addLast("handler", new OutboundHandler(ctx.channel()));
+
+			}
+		});
         ChannelFuture f = cb.connect(new InetSocketAddress(remoteHost, remotePort));
-        outboundChannel = f.getChannel();
+        outboundChannel = f.channel();
         f.addListener(new ChannelFutureListener() {
             @Override public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()) {
                     logger.info("connected to remote host: {}, port: {}", remoteHost, remotePort);
-                    inboundChannel.setReadable(true);
+                    inboundChannel.config().setAutoRead(true);
                 } else {                    
                     inboundChannel.close();
                 }
@@ -76,28 +89,31 @@ public class ProxyHandler extends SimpleChannelUpstreamHandler {
     }
 
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
-        ChannelBuffer in = (ChannelBuffer) e.getMessage();
-        // logger.debug(">>> [{}] {}", in.readableBytes(), ChannelBuffers.hexDump(in));
+    public void channelRead(ChannelHandlerContext ctx, Object msg ) {
+        ByteBuf in = (ByteBuf)  msg;
+        // logger.debug(">>> [{}] {}", in.readableBytes(), ByteBufs.hexDump(in));
         outboundChannel.write(in);
     }
 
     @Override
-    public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) {
+    public void channelInactive(ChannelHandlerContext ctx) {
         logger.info("closing inbound channel");
         if (outboundChannel != null) {
-            closeOnFlush(outboundChannel);
+            if(outboundChannel.isActive()){
+            	outboundChannel.close();
+            }
         }
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) {
         logger.info("inbound exception: {}", e.getCause().getMessage());
-        closeOnFlush(e.getChannel());
+        if(ctx.channel().isActive()){
+        	ctx.close();
+        }
     }
 
-    @ChannelPipelineCoverage("one")
-    private class OutboundHandler extends SimpleChannelUpstreamHandler {
+    private class OutboundHandler extends ChannelInboundHandlerAdapter {
 
         private final Channel inboundChannel;
 
@@ -107,28 +123,26 @@ public class ProxyHandler extends SimpleChannelUpstreamHandler {
         }
 
         @Override
-        public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
-            ChannelBuffer in = (ChannelBuffer) e.getMessage();
-            // logger.debug("<<< [{}] {}", in.readableBytes(), ChannelBuffers.hexDump(in));
+        public void channelRead(ChannelHandlerContext ctx, Object msg) {
+            ByteBuf in = (ByteBuf) msg;
+            // logger.debug("<<< [{}] {}", in.readableBytes(), ByteBufs.hexDump(in));
             inboundChannel.write(in);
         }
 
         @Override
-        public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) {
+        public void channelInactive(ChannelHandlerContext ctx) {
             logger.info("closing outbound channel");
-            closeOnFlush(inboundChannel);
+            if(ctx.channel().isActive()){
+            	ctx.close();
+            }
         }
 
         @Override
-        public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
+        public void exceptionCaught(ChannelHandlerContext ctx,Throwable e) {
             logger.info("outbound exception: {}", e.getCause().getMessage());
-            closeOnFlush(e.getChannel());
-        }
-    }
-
-    static void closeOnFlush(Channel ch) {
-        if (ch.isConnected()) {
-            ch.write(ChannelBuffers.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+            if(ctx.channel().isActive()){
+            	ctx.close();
+            }
         }
     }
 

@@ -223,6 +223,26 @@ public abstract class RtmpPublisher {
             }
         });
     }
+    public void fireNext(final ChannelHandlerContext ctx, final long delay) {
+        final Event readyForNext = new Event(currentConversationId);
+        if(delay > timerTickSize) {
+            timer.newTimeout(new TimerTask() {
+                @Override public void run(Timeout timeout) {
+                    if(logger.isDebugEnabled()) {
+                        logger.debug("running after delay: {}", delay);
+                    }
+                    if(readyForNext.conversationId != currentConversationId) {
+                        logger.debug("pending 'next' event found obsolete, aborting");
+                        return;
+                    }
+                    ctx.pipeline().fireChannelRead(readyForNext);
+                }
+            }, delay, TimeUnit.MILLISECONDS);
+        } else {
+        	ctx.pipeline().fireChannelRead(readyForNext);
+        }
+    }
+
     public void pause() {
         paused = true;
         currentConversationId++;

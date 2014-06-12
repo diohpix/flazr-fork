@@ -45,8 +45,7 @@ public class RtmpEncoder extends MessageToByteEncoder<RtmpMessage>  {
         channelPrevHeaders = new RtmpHeader[RtmpHeader.MAX_CHANNEL_ID];
     }
     @Override
-    protected void encode(ChannelHandlerContext ctx, final RtmpMessage message, ByteBuf pout){
-//    	System.out.println("RTMP ENCODER "+message);
+    public void encode(ChannelHandlerContext ctx, final RtmpMessage message, ByteBuf pout){
         final ByteBuf in = message.encode();
         final RtmpHeader header = message.getHeader();
         if(header.isChunkSize()) {
@@ -96,6 +95,8 @@ public class RtmpEncoder extends MessageToByteEncoder<RtmpMessage>  {
             in.readBytes(nout, size);
         }
         ctx.writeAndFlush(nout);
+        ReferenceCountUtil.release(nout);
+        ReferenceCountUtil.release(message);
     }
 
 }

@@ -60,7 +60,7 @@ public class RtmpClient {
         options.setThreads(1);
         options.setLoad(1);
         options.setLoop(1);
-		options.setReaderToPublish(new F4vReader("/Users/xiphoid/a.mp4"));
+		options.setReaderToPublish(new F4vReader("/Users/xiphoid/x.m4a"));
         workerGroup = new NioEventLoopGroup(1);
 		bootstrap= new Bootstrap();
 		bootstrap.group(workerGroup);

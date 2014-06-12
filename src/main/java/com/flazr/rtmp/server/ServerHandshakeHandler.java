@@ -19,23 +19,19 @@
 
 package com.flazr.rtmp.server;
 
-import com.flazr.rtmp.RtmpHandshake;
-import com.flazr.rtmp.RtmpPublisher;
-import com.flazr.util.Utils;
+import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.ByteToMessageDecoder;
+
 import java.util.Arrays;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelDownstreamHandler;
-import org.jboss.netty.channel.ChannelEvent;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.Channels;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.handler.codec.frame.FrameDecoder;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ServerHandshakeHandler extends FrameDecoder implements ChannelDownstreamHandler {
+import com.flazr.rtmp.RtmpHandshake;
+import com.flazr.util.Utils;
+
+public class ServerHandshakeHandler extends ByteToMessageDecoder   {
 
     private static final Logger logger = LoggerFactory.getLogger(ServerHandshakeHandler.class);
     
@@ -48,64 +44,36 @@ public class ServerHandshakeHandler extends FrameDecoder implements ChannelDowns
         handshake = new RtmpHandshake();
     }
 
-    @Override
-    protected Object decode(ChannelHandlerContext ctx, Channel channel, ChannelBuffer in) {        
-        if(!partOneDone) {            
+	@Override
+	protected void decode(io.netty.channel.ChannelHandlerContext ctx,ByteBuf in, List<Object> out) throws Exception {
+		if(!partOneDone) {            
             if(in.readableBytes() < RtmpHandshake.HANDSHAKE_SIZE + 1) {
-                return null;
+                return;
             }
             handshake.decodeClient0And1(in);
             rtmpe = handshake.isRtmpe();
-            ChannelFuture future = Channels.succeededFuture(channel);
-            Channels.write(ctx, future, handshake.encodeServer0());
-            Channels.write(ctx, future, handshake.encodeServer1());
-            Channels.write(ctx, future, handshake.encodeServer2());
+            ctx.write(handshake.encodeServer0(),ctx.newPromise());
+            ctx.write(handshake.encodeServer1(),ctx.newPromise());
+            ctx.write(handshake.encodeServer2(),ctx.newPromise());
             partOneDone = true;
         }
         if(!handshakeDone) {
             if(in.readableBytes() < RtmpHandshake.HANDSHAKE_SIZE) {
-                return null;
+                return;
             }
             handshake.decodeClient2(in);
             handshakeDone = true;
             logger.info("handshake done, rtmpe: {}", rtmpe);
             if(Arrays.equals(handshake.getPeerVersion(), Utils.fromHex("00000000"))) {
-                final ServerHandler serverHandler = ctx.getPipeline().get(ServerHandler.class);
+                final ServerHandler serverHandler = ctx.pipeline().get(ServerHandler.class);
                 serverHandler.setAggregateModeEnabled(false);
                 logger.info("old client version, disabled 'aggregate' mode");
             }
             if(!rtmpe) {
-                channel.getPipeline().remove(this);
+                ctx.pipeline().remove(this);
             }
         }
-        return in;
-    }
-
-    @Override
-    public void handleUpstream(final ChannelHandlerContext ctx, final ChannelEvent ce) throws Exception {        
-        if (!handshakeDone || !rtmpe || !(ce instanceof MessageEvent)) {
-            super.handleUpstream(ctx, ce);
-            return;
-        }
-        final MessageEvent me = (MessageEvent) ce;
-        if(me.getMessage() instanceof RtmpPublisher.Event) {
-            super.handleUpstream(ctx, ce);
-            return;
-        }
-        final ChannelBuffer in = (ChannelBuffer) ((MessageEvent) ce).getMessage();
-        handshake.cipherUpdateIn(in);
-        Channels.fireMessageReceived(ctx, in);
-    }
-
-    @Override
-    public void handleDownstream(ChannelHandlerContext ctx, ChannelEvent ce) {        
-        if (!handshakeDone || !rtmpe || !(ce instanceof MessageEvent)) {
-            ctx.sendDownstream(ce);
-            return;
-        }
-        final ChannelBuffer in = (ChannelBuffer) ((MessageEvent) ce).getMessage();
-        handshake.cipherUpdateOut(in);
-        ctx.sendDownstream(ce);
-    }
+        out.add(in);
+	}
 
 }
