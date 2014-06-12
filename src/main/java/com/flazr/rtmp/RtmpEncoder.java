@@ -20,8 +20,7 @@
 package com.flazr.rtmp;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.netty.util.ReferenceCountUtil;
@@ -29,7 +28,6 @@ import io.netty.util.ReferenceCountUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.flazr.rtmp.RtmpPublisher.Event;
 import com.flazr.rtmp.message.ChunkSize;
 import com.flazr.rtmp.message.Control;
 
@@ -82,7 +80,7 @@ public class RtmpEncoder extends MessageToByteEncoder<RtmpMessage>  {
         }
         channelPrevHeaders[channelId] = header;        
         logger.debug(">> {}", message);
-        ByteBuf nout = ctx.alloc().buffer(   RtmpHeader.MAX_ENCODED_SIZE + header.getSize() + header.getSize() / chunkSize);
+        ByteBuf nout = Unpooled.buffer(   RtmpHeader.MAX_ENCODED_SIZE + header.getSize() + header.getSize() / chunkSize);
         boolean first = true;
         while(in.isReadable()) {
             final int size = Math.min(chunkSize, in.readableBytes());

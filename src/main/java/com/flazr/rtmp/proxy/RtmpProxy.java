@@ -19,22 +19,13 @@
 
 package com.flazr.rtmp.proxy;
 
-import io.netty.bootstrap.Bootstrap;
-import io.netty.bootstrap.ChannelFactory;
-import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.group.ChannelGroup;
-import io.netty.channel.group.ChannelGroupFuture;
 import io.netty.channel.group.DefaultChannelGroup;
-
-import java.net.InetSocketAddress;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.flazr.rtmp.RtmpConfig;
-import com.flazr.util.StopMonitor;
 
 public class RtmpProxy {
 

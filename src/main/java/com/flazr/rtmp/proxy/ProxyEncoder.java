@@ -20,6 +20,7 @@
 package com.flazr.rtmp.proxy;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.SimpleChannelInboundHandler;
 
 import com.flazr.rtmp.RtmpEncoder;
@@ -33,7 +34,7 @@ public class ProxyEncoder extends SimpleChannelInboundHandler<RtmpMessage> {
 	@Override
 	protected void channelRead0(io.netty.channel.ChannelHandlerContext ctx,RtmpMessage msg) throws Exception {
 		// TODO Auto-generated method stub
-		ByteBuf out = ctx.alloc().buffer();
+		ByteBuf out = Unpooled.buffer();
 		encoder.encode(ctx,msg,out);
 		ctx.pipeline().fireChannelRead(out);
 	}

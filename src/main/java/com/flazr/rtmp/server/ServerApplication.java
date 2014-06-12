@@ -19,6 +19,12 @@
 
 package com.flazr.rtmp.server;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.flazr.io.f4v.F4vReader;
 import com.flazr.io.flv.FlvReader;
 import com.flazr.io.flv.FlvWriter;
@@ -26,10 +32,6 @@ import com.flazr.rtmp.RtmpConfig;
 import com.flazr.rtmp.RtmpReader;
 import com.flazr.rtmp.RtmpWriter;
 import com.flazr.util.Utils;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ServerApplication {
 

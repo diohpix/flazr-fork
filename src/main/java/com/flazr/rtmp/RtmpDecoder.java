@@ -20,6 +20,7 @@
 package com.flazr.rtmp;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ReplayingDecoder;
 
@@ -68,7 +69,7 @@ public class RtmpDecoder extends ReplayingDecoder<DecoderState> {
             channelId = header.getChannelId();
             if(incompletePayloads[channelId] == null) { // new chunk stream
                 incompleteHeaders[channelId] = header;
-                incompletePayloads[channelId] = ctx.alloc().buffer(header.getSize());
+                incompletePayloads[channelId] = Unpooled.buffer(header.getSize());
             }
             payload = incompletePayloads[channelId];
             checkpoint(DecoderState.GET_PAYLOAD);

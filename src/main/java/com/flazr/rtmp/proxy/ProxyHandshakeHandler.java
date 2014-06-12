@@ -23,8 +23,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-import java.nio.channels.Channels;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

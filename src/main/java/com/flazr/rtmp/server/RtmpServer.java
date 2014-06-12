@@ -20,8 +20,6 @@
 package com.flazr.rtmp.server;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.bootstrap.ChannelFactory;
-import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -35,7 +33,6 @@ import io.netty.util.Timer;
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -44,8 +41,6 @@ import org.slf4j.LoggerFactory;
 import com.flazr.rtmp.RtmpConfig;
 import com.flazr.rtmp.RtmpDecoder;
 import com.flazr.rtmp.RtmpEncoder;
-import com.flazr.rtmp.client.ClientHandler;
-import com.flazr.rtmp.client.ClientHandshakeHandler;
 import com.flazr.util.StopMonitor;
 
 public class RtmpServer {
