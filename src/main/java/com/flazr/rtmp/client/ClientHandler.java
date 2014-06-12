@@ -36,7 +36,6 @@ import com.flazr.io.flv.FlvWriter;
 import com.flazr.rtmp.LoopedReader;
 import com.flazr.rtmp.RtmpMessage;
 import com.flazr.rtmp.RtmpPublisher;
-import com.flazr.rtmp.RtmpPublisher.Event;
 import com.flazr.rtmp.RtmpReader;
 import com.flazr.rtmp.RtmpWriter;
 import com.flazr.rtmp.message.BytesRead;

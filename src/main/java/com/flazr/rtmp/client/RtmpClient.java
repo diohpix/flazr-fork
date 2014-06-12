@@ -28,6 +28,7 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler.ServerHandshakeStateEvent;
 
 import java.net.InetSocketAddress;
 
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import com.flazr.io.f4v.F4vReader;
 import com.flazr.rtmp.RtmpDecoder;
 import com.flazr.rtmp.RtmpEncoder;
+import com.flazr.rtmp.server.ServerStream;
 import com.flazr.util.Utils;
 
 public class RtmpClient {
@@ -53,7 +55,7 @@ public class RtmpClient {
         options.setStreamName("test1");
         options.setPort(1935);
         options.setClientVersionToUse(Utils.fromHex("00000000"));
-        options.setPublishType(ClientOptions.PublishType.LIVE);
+        options.setPublishType(ServerStream.PublishType.LIVE);
         options.setStart(0);
         options.setLength(-1);
         options.setBuffer(100);

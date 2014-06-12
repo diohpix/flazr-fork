@@ -45,27 +45,14 @@ import org.slf4j.LoggerFactory;
 import com.flazr.rtmp.RtmpHandshake;
 import com.flazr.rtmp.RtmpReader;
 import com.flazr.rtmp.RtmpWriter;
+import com.flazr.rtmp.server.ServerStream;
+import com.flazr.rtmp.server.ServerStream.PublishType;
 import com.flazr.util.Utils;
 
 public class ClientOptions {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientOptions.class);
-    public static enum PublishType {
-
-        LIVE,
-        APPEND,
-        RECORD;
-
-        public String asString() {
-            return this.name().toLowerCase();
-        }
-
-        public static PublishType parse(final String raw) {
-            return PublishType.valueOf(raw.toUpperCase());
-        }
-
-    }
-    private PublishType publishType;
+    private ServerStream.PublishType publishType;
     private String host = "localhost";
     private int port = 1935;
     private String appName = "vod";
