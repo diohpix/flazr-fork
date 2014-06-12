@@ -42,7 +42,7 @@ public class Video extends DataMessage {
 
     public Video(final int time, final byte[] prefix, final int compositionOffset, final byte[] videoData) {
         header.setTime(time);
-        data = Unpooled.wrappedBuffer(prefix, Utils.toInt24(compositionOffset), videoData);
+        data = Unpooled.copiedBuffer(prefix, Utils.toInt24(compositionOffset), videoData);
         header.setSize(data.readableBytes());
     }
 
