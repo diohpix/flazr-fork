@@ -41,7 +41,7 @@ public class Audio extends DataMessage {
 
     public Audio(final int time, final byte[] prefix, final byte[] audioData) {
         header.setTime(time);
-        data = Unpooled.wrappedBuffer(prefix, audioData);
+        data = Unpooled.copiedBuffer(prefix,audioData);
         header.setSize(data.readableBytes());
     }
 
