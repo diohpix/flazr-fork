@@ -158,6 +158,7 @@ public class TrackInfo {
                 Sample sample = chunk.getSamples().get(sampleIndex++);
                 final int rawDuration = sttsRecord.getSampleDuration();
                 final int duration = sample.convertFromTimeScale(rawDuration);
+                System.out.println("DURA "+duration+" "+rawDuration);
                 sample.setDuration(duration);
                 final int time = sample.convertFromTimeScale(rawTime);
                 sample.setTime(time);
