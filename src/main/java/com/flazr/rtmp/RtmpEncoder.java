@@ -93,7 +93,7 @@ public class RtmpEncoder extends MessageToByteEncoder<RtmpMessage>  {
             in.readBytes(nout, size);
         }
         ctx.writeAndFlush(nout);
-        ReferenceCountUtil.release(nout);
+        ReferenceCountUtil.release(in);
         ReferenceCountUtil.release(message);
     }
 

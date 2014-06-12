@@ -29,7 +29,7 @@ import java.util.Arrays;
 public class ValueToEnum<T extends Enum<T> & ValueToEnum.IntValue> {
 
     public static interface IntValue {
-        int intValue();
+    	int intValue();
     }
 
     private final Enum[] lookupArray;

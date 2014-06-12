@@ -64,7 +64,7 @@ public class F4vReader implements RtmpReader {
         final MovieInfo movie = new MovieInfo(in);
         in.position(0);
         AVC1_BEGIN = movie.getVideoDecoderConfig();
-//        AVC1_BEGIN = new byte[] { 1, 66, 0, 30, -1, -31, 0, 14,	103, 66, 0, 30, -115, 104, 10, 3, -38, 106, 12, 2, 12,	4, 1, 0, 4, 104, -50, 9, -56 };// null;//movie.getVideoDecoderConfig();
+        //AVC1_BEGIN = new byte[] { 1, 66, 0, 30, -1, -31, 0, 14,	103, 66, 0, 30, -115, 104, 10, 3, -38, 106, 12, 2, 12,	4, 1, 0, 4, 104, -50, 9, -56 };// null;//movie.getVideoDecoderConfig();
         MP4A_BEGIN = movie.getAudioDecoderConfig();
         //logger.debug("video decoder config inited: {}", Utils.toHex(AVC1_BEGIN));
         metadata = Metadata.onMetaData(movie);
