@@ -57,7 +57,6 @@ public class RtmpDecoder extends ReplayingDecoder<DecoderState> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-    	System.out.println("RtmpDecoder Active");
     	super.channelActive(ctx);
     }
     @Override
