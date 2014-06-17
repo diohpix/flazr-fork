@@ -26,7 +26,7 @@ import com.flazr.rtmp.RtmpHeader;
 
 public class BytesRead extends AbstractMessage {
 
-    private int value;
+    private long value;
 
     @Override
     MessageType getMessageType() {
@@ -41,14 +41,14 @@ public class BytesRead extends AbstractMessage {
         this.value = (int) bytesRead;
     }
 
-    public int getValue() {
+    public long getValue() {
         return value;
     }
 
     @Override
     public ByteBuf encode() {
-        ByteBuf out = Unpooled.buffer(4);
-        out.writeInt(value);
+        ByteBuf out = Unpooled.buffer(Long.SIZE);
+        out.writeLong(value);
         return out;
     }
 

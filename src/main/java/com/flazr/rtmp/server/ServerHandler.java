@@ -58,7 +58,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
 
     private long bytesWritten;
     private int bytesWrittenWindow = 2500000;
-    private int bytesWrittenLastReceived;   
+    private long bytesWrittenLastReceived;   
 
     private ServerApplication application;
     private String clientId;

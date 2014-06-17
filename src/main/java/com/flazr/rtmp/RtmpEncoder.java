@@ -42,6 +42,22 @@ public class RtmpEncoder extends MessageToByteEncoder<RtmpMessage>  {
         logger.debug("clearing prev stream headers");
         channelPrevHeaders = new RtmpHeader[RtmpHeader.MAX_CHANNEL_ID];
     }
+    private RtmpHeader.Type getHeaderType(final RtmpHeader header, final RtmpHeader lastHeader) {
+        if (lastHeader == null) {
+                return RtmpHeader.Type.LARGE;
+        }
+        final long diff = header.getTime()-  lastHeader.getTime();;
+        if (header.getStreamId() != lastHeader.getStreamId() || diff < 0 ) {
+        	return RtmpHeader.Type.LARGE;
+        } else if (header.getSize() != lastHeader.getSize() || header.isAudio() != lastHeader.isAudio()  ) {
+        	return RtmpHeader.Type.MEDIUM;
+        	
+        } else if (header.getTime() != lastHeader.getTime() + lastHeader.getDeltaTime()) {
+        	return RtmpHeader.Type.SMALL;
+        } else {
+        	return RtmpHeader.Type.TINY;
+        }
+}
     @Override
     public void encode(ChannelHandlerContext ctx, final RtmpMessage message, ByteBuf pout){
         final ByteBuf in = message.encode();
@@ -58,15 +74,16 @@ public class RtmpEncoder extends MessageToByteEncoder<RtmpMessage>  {
         }
         final int channelId = header.getChannelId();
         header.setSize(in.readableBytes());
-        final RtmpHeader prevHeader = channelPrevHeaders[channelId];       
+        final RtmpHeader prevHeader = channelPrevHeaders[channelId]; 
         if(prevHeader != null // first stream message is always large
                 && header.getStreamId() > 0 // all control messages always large
                 && header.getTime() > 0) { // if time is zero, always large
-            if(header.getSize() == prevHeader.getSize()) {
-                header.setHeaderType(RtmpHeader.Type.SMALL);
+        /*    if(header.getSize() == prevHeader.getSize()) {
+                //header.setHeaderType(RtmpHeader.Type.SMALL);
+                header.setHeaderType(RtmpHeader.Type.MEDIUM);
             } else {
                 header.setHeaderType(RtmpHeader.Type.MEDIUM);
-            }
+            }*/
             final int deltaTime = header.getTime() - prevHeader.getTime();
             if(deltaTime < 0) {
                 logger.warn("negative time: {}", header);
@@ -74,8 +91,8 @@ public class RtmpEncoder extends MessageToByteEncoder<RtmpMessage>  {
             } else {
                 header.setDeltaTime(deltaTime);
             }
+        	header.setHeaderType(getHeaderType(header,prevHeader));
         } else {
-			// otherwise force to LARGE
             header.setHeaderType(RtmpHeader.Type.LARGE);
         }
         channelPrevHeaders[channelId] = header;        

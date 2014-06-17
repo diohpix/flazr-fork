@@ -38,7 +38,10 @@ public class Chunk implements Comparable {
         sampleType = track.getStsd().getSampleType(sampleDescIndex);
         timeScale = new BigDecimal(track.getMdhd().getTimeScale());
     }
-
+    
+    public void setTimeSacle(BigDecimal t){
+    	this.timeScale = t;
+    }
     public BigDecimal getTimeScale() {
         return timeScale;
     }
@@ -46,7 +49,9 @@ public class Chunk implements Comparable {
     public SampleType getSampleType() {
         return sampleType;
     }    
-
+    public void setSampleType(SampleType sampleType){
+    	this.sampleType = sampleType;
+    }
     //==========================================================================
 
     public TrackInfo getTrack() {

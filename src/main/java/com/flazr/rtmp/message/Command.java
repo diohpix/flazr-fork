@@ -114,7 +114,7 @@ public abstract class Command extends AbstractMessage {
             pair("flashVer", "WIN 9,0,124,2"),
             pair("tcUrl", options.getTcUrl()),
             pair("fpad", false),
-            pair("audioCodecs",3191.0),
+            pair("audioCodecs",4071.0),
             pair("videoCodecs", 252.0),
             //pair("audioCodecs",0),
             //pair("videoCodecs", 0),

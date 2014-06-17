@@ -52,6 +52,15 @@ public class FileChannelReader implements BufferReader {
         }
         logger.info("opened file: {}", absolutePath);
     }
+    public FileChannelReader(final FileChannel file) {
+    	absolutePath = null;
+        try {
+            in = file;
+            fileSize = in.size();
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     public long size() {
@@ -108,9 +117,11 @@ public class FileChannelReader implements BufferReader {
         try {
             in.close();
         } catch(Exception e) {
-            logger.warn("error closing file {}: {}", absolutePath, e.getMessage());
+        	if(absolutePath!=null)
+        		logger.warn("error closing file {}: {}", absolutePath, e.getMessage());
         }
-        logger.info("closed file: {}", absolutePath);
+        if(absolutePath!=null)
+        	logger.info("closed file: {}", absolutePath);
     }
 
 }
