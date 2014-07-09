@@ -25,10 +25,11 @@ import java.math.RoundingMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Sample implements Comparable {
+public class Sample implements Comparable ,Cloneable {
 
     private static final Logger logger = LoggerFactory.getLogger(Sample.class);
 
+    private long fileNubmer; // random 
     private Chunk chunk;
     private int size;
     private int duration;
@@ -36,7 +37,8 @@ public class Sample implements Comparable {
     private int compositionTimeOffset;
     private boolean syncSample;
     private long fileOffset;
-
+    private byte[] samplebyte;
+    
     public int convertFromTimeScale(final long time) {
         final BigDecimal factor = new BigDecimal(time * 1000);
         return factor.divide(chunk.getTimeScale(), RoundingMode.HALF_EVEN).intValue();
@@ -48,7 +50,15 @@ public class Sample implements Comparable {
 
     //==========================================================================
 
-    public long getFileOffset() {
+    public long getFileNubmer() {
+		return fileNubmer;
+	}
+
+	public void setFileNubmer(long fileNubmer) {
+		this.fileNubmer = fileNubmer;
+	}
+
+	public long getFileOffset() {
         return fileOffset;
     }
 
@@ -143,5 +153,21 @@ public class Sample implements Comparable {
         sb.append("]");
         return sb.toString();
     }
+
+	public byte[] getSamplebyte() {
+		return samplebyte;
+	}
+
+	public void setSamplebyte(byte[] samplebyte) {
+		this.samplebyte = samplebyte;
+	}
+	public Object clone() throws CloneNotSupportedException {
+		  Sample a = (Sample)super.clone();
+		  /*a.setChunk(this.chunk);
+		  a.setDuration(this.duration);
+		  a.setSyncSample(this.syncSample);
+		  a.setTime(this.time);*/
+		  return a;
+	}
     
 }
